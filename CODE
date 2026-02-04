@@ -1,0 +1,39 @@
+const int speedPin = 9; // PWM pin
+const int dirPin = 8;   // Direction pin
+
+void setup() {
+  pinMode(speedPin, OUTPUT);
+  pinMode(dirPin, OUTPUT);
+  digitalWrite(dirPin, LOW); // Establish direction
+  
+  Serial.begin(9600);
+  Serial.println("--- Fan Control System Initialized ---");
+  Serial.println("Enter Temperature (25 to 45):");
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    // Read the number you typed into Serial Monitor
+    int inputTemp = Serial.parseInt(); 
+    
+    // Constrain to your specific range so the motor doesn't glitch
+    int constrainedTemp = constrain(inputTemp, 25, 45);
+
+    // Map 25-45 degrees to 0-255 PWM speed
+    int fanSpeed = map(constrainedTemp, 25, 45, 0, 255);
+
+    // If temp is exactly 25, ensure it's fully OFF
+    if (constrainedTemp <= 25) {
+      fanSpeed = 0;
+    }
+
+    analogWrite(speedPin, fanSpeed);
+
+    // Output status back to you
+    Serial.print("Current Temp: ");
+    Serial.print(constrainedTemp);
+    Serial.print("C | Fan Power: ");
+    Serial.print((fanSpeed * 100) / 255); // Shows percentage
+    Serial.println("%");
+  }
+}
